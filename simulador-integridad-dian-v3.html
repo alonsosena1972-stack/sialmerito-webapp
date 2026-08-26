@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulador DIAN · Código de Integridad · SÍ AL MÉRITO</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:system-ui;margin:0;background:#f5f7fa;color:#192638}header{background:#09233f;color:#fff;padding:28px 6vw}main{max-width:820px;margin:22px auto;padding:0 18px}.card{background:#fff;padding:26px;border-radius:16px;border:1px solid #e1e7ee;box-shadow:0 10px 24px #1231;}.meta{display:flex;justify-content:space-between;color:#607083;font-size:13px}.bar{height:8px;background:#e7ebef;border-radius:8px;margin:12px 0 24px}.fill{height:100%;width:2%;background:#d6a83b;border-radius:8px}.opt{display:block;border:1px solid #dfe6ed;padding:14px;border-radius:10px;margin:9px 0;cursor:pointer}.opt:has(input:checked){background:#f1fafc;border-color:#3c91a8}button{border:0;border-radius:9px;padding:12px 17px;background:#09233f;color:#fff;font-weight:700;cursor:pointer}button:disabled{opacity:.4}.actions{display:flex;justify-content:space-between;margin-top:22px}.note{background:#fff9e8;border-left:4px solid #d6a83b;padding:12px;margin-top:18px;font-size:13px}.hidden{display:none}.score{text-align:center;font-size:56px;color:#0f6178;font-weight:800}.error{color:#a33}.small{font-size:13px;color:#607083}h1{margin-bottom:4px}
+</style>
+</head>
+<body>
+<header><strong>SÍ AL MÉRITO</strong><h1>Código de Integridad DIAN</h1><p>50 afirmaciones · resultado sobre 50</p></header>
+<main>
+<section class="card" id="intro"><h2>Iniciar simulador</h2><p>Responda las 50 afirmaciones según su comportamiento habitual. Esta práctica es formativa y no es una prueba oficial. Ingrese su correo para guardar el intento.</p><input id="email" type="email" placeholder="Correo electrónico" style="width:100%;padding:13px;border:1px solid #ccd6df;border-radius:8px;box-sizing:border-box"><button id="start" style="margin-top:14px">Comenzar</button><p id="introMsg" class="error"></p></section>
+<section class="card hidden" id="test"><div class="meta"><span id="sec"></span><span id="cnt"></span></div><div class="bar"><div class="fill" id="fill"></div></div><h2 id="statement"></h2><div id="options"></div><div class="actions"><button id="prev">Anterior</button><button id="next">Siguiente</button></div><p id="testMsg" class="error"></p><p class="small">Seleccione una sola opción. Puede regresar y cambiar sus respuestas.</p></section>
+<section class="card hidden" id="result"><h2>Resultado guardado</h2><div class="score" id="score"></div><p id="saved"></p><div class="note">La retroalimentación detallada se solicita por separado.</div></section>
+</main>
+<script>
+const SUPABASE_URL='https://ygbawnqvrynvxmdgqqvw.supabase.co';
+const SUPABASE_KEY='sb_publishable_wtYql947qdzvdkfi2_IUNA_gQ64GNAK';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const SCALE=['Nunca','Rara vez','Ocasionalmente','Frecuentemente','Siempre'];
+const Q=[
+['Actúo con transparencia, incluso cuando nadie está supervisando mi trabajo.',1],
+['Informo oportunamente cuando cometo un error que puede afectar un trámite.',1],
+['Evito usar información institucional para obtener beneficios personales.',1],
+['Oculto un error menor para evitar llamados de atención.',0],
+['Protejo la información reservada y la comparto solo con quien está autorizado.',1],
+['Cumplo mis funciones sin aceptar regalos, favores o beneficios de usuarios.',1],
+['Si un conocido solicita trato preferencial, le explico que debe seguir el procedimiento.',1],
+['Considero aceptable recibir un obsequio si no cambia mi decisión.',0],
+['Documento las razones de mis decisiones para que puedan ser verificadas.',1],
+['Uso los recursos públicos únicamente para los fines autorizados.',1],
+['Trato con respeto a todas las personas, sin importar su cargo o condición.',1],
+['Escucho con atención antes de responder a una persona inconforme.',1],
+['Evito comentarios o conductas que puedan humillar a un compañero.',1],
+['Cuando tengo prisa, interrumpo a los usuarios aunque todavía estén explicando su situación.',0],
+['Reconozco la diversidad de opiniones dentro del equipo.',1],
+['Mantengo un trato cordial aun cuando debo negar una solicitud.',1],
+['Cumplo los horarios y compromisos que he asumido.',1],
+['Busco mejorar la calidad de mi trabajo y aprender de la retroalimentación.',1],
+['Reviso los datos antes de enviar una respuesta oficial.',1],
+['Dejo para después una tarea importante si no hay supervisión cercana.',0],
+['Doy prioridad a las actividades según su impacto y los plazos establecidos.',1],
+['Solicito apoyo cuando una situación supera mis conocimientos o competencias.',1],
+['Hago seguimiento a los asuntos hasta asegurar una respuesta completa.',1],
+['Si el sistema funciona lentamente, ingreso información aproximada para avanzar.',0],
+['Uso canales institucionales para dejar trazabilidad de mis actuaciones.',1],
+['Tomo decisiones imparciales, basadas en normas y hechos verificables.',1],
+['Me aparto de una decisión cuando existe un conflicto de interés.',1],
+['Aplico el mismo criterio a casos equivalentes, salvo justificación normativa.',1],
+['Favorezco a quien conozco personalmente cuando puedo hacerlo sin ser descubierto.',0],
+['Explico de manera clara los requisitos y las razones de una decisión.',1],
+['Reviso mis prejuicios antes de valorar una solicitud o un caso.',1],
+['Respeto el debido proceso, incluso cuando considero que una persona se equivoca.',1],
+['Consulto la norma vigente antes de adoptar una decisión compleja.',1],
+['Cambio el orden de atención para ayudar a alguien que me lo pide con insistencia.',0],
+['Declaro las situaciones que podrían comprometer mi objetividad.',1],
+['Mantengo separados mis asuntos personales de las responsabilidades del cargo.',1],
+['Utilizo bases de datos institucionales solo cuando existe una razón laboral legítima.',1],
+['Reenvío documentos internos a personas externas si considero que podrían ser útiles.',0],
+['Cuido los documentos y equipos que están bajo mi responsabilidad.',1],
+['Participo activamente en la prevención de riesgos de corrupción.',1],
+['Comunico por los canales establecidos las conductas que podrían afectar la integridad pública.',1],
+['Prefiero callar una irregularidad para no generar problemas en el equipo.',0],
+['Actúo de forma coherente con los valores institucionales también fuera de la supervisión.',1],
+['Acepto las consecuencias de mis decisiones y respondo por mis actuaciones.',1],
+['Busco soluciones legales y equitativas cuando una situación no está prevista con claridad.',1],
+['Me niego a alterar un documento, una fecha o un dato para beneficiar un trámite.',1],
+['Presiono a otros servidores para que modifiquen una decisión en favor de un tercero.',0],
+['Doy un uso responsable a mi tiempo laboral y a los recursos asignados.',1],
+['Coopero con las verificaciones y controles institucionales.',1],
+['Pongo el interés general por encima de mi conveniencia particular.',1]
+];
+let ans=Array(50).fill(null),i=0,email='';
+const $=id=>document.getElementById(id);
+function render(){let [text,direct]=Q[i];$('sec').textContent='Afirmación '+(i+1);$('cnt').textContent=(i+1)+' de 50';$('fill').style.width=((i+1)*2)+'%';$('statement').textContent=text;$('options').innerHTML=SCALE.map((x,n)=>`<label class="opt"><input type="radio" name="answer" value="${n}" ${ans[i]===n?'checked':''}> ${x}</label>`).join('');$('prev').disabled=i===0;$('next').textContent=i===49?'Finalizar':'Siguiente';}
+$('start').onclick=()=>{email=$('email').value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){$('introMsg').textContent='Ingrese un correo válido.';return;} $('intro').classList.add('hidden');$('test').classList.remove('hidden');render();};
+$('options').onclick=()=>{let el=document.querySelector('input[name=answer]:checked');if(el)ans[i]=Number(el.value);};
+$('prev').onclick=()=>{if(i>0){i--;render();}};
+$('next').onclick=async()=>{let el=document.querySelector('input[name=answer]:checked');if(el)ans[i]=Number(el.value);if(ans[i]===null){$('testMsg').textContent='Seleccione una opción para continuar.';return;}if(i<49){i++;$('testMsg').textContent='';render();return;}if(ans.some(x=>x===null)){let p=ans.findIndex(x=>x===null);$('testMsg').textContent='Falta responder la afirmación '+(p+1)+'.';i=p;render();return;}$('next').disabled=true;let score=Math.round(ans.reduce((sum,v,k)=>sum+(Q[k][1]?v:4-v),0)/4);let respuestas=ans.slice();let payload={email,simulador:'codigo_integridad_dian_50_v4',puntaje_total:score,puntaje_comportamental:0,puntaje_integridad:score,puntaje_integrador:score,respuestas};let {error}=await db.from('simulador_intentos').insert(payload);if(error){$('testMsg').textContent='No fue posible guardar el intento. Intente nuevamente.';$('next').disabled=false;return;}$('test').classList.add('hidden');$('result').classList.remove('hidden');$('score').textContent=score+'/50';$('saved').textContent='Resultado guardado: '+score+'/50. Fecha e intento registrados.';};
+</script>
+</body></html>
