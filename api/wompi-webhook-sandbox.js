@@ -23,6 +23,14 @@ module.exports = async (req, res) => {
     if (!received || received.length !== checksum.length || !crypto.timingSafeEqual(Buffer.from(received), Buffer.from(checksum))) {
       return res.status(401).json({ error: 'Firma de evento inválida' });
     }
+    console.log(JSON.stringify({
+      tag: 'WOMPI_SANDBOX_WEBHOOK_VALID',
+      event: event.event,
+      transactionId: getPath(event.data, 'transaction.id'),
+      reference: getPath(event.data, 'transaction.reference'),
+      status: getPath(event.data, 'transaction.status'),
+      receivedAt: new Date().toISOString()
+    }));
     return res.status(200).json({ received: true, environment: 'sandbox' });
   } catch (_) {
     return res.status(400).json({ error: 'Evento no válido' });
